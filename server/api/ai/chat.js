@@ -6,6 +6,8 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event)
     const { idToken, projectId, message } = body
 
+
+
     const chat = await sendProjectChat(idToken, projectId,message )
 
     const chatlogs = await getProjectChatlogs(idToken, projectId);
@@ -21,7 +23,7 @@ export default defineEventHandler(async (event) => {
 
     console.log(ai);
 
-    return { success: true, chat }
+    return { success: true, chat, reply }
   } catch (err) {
     console.error('Post failed:', err)
     return { error: 'Failed to post: ' + err.message }

@@ -31,7 +31,39 @@ export async function getProjectChatlogs(idToken, projectId) {
 
 
 export async function sendProjectChat(idToken, projectId, message) {
-  if (!idToken || !projectId || !message) {
+  if (!idToken || !message) {
+    throw new Error('Missing required data')
+  }
+
+  // if(!projectId ){
+  //   projectId = '_chatbot'
+  // }
+
+  const decoded = await adminAuth.verifyIdToken(idToken)
+  const uid = decoded.uid
+
+  const chatRef = adminDb
+    .collection('users')
+    .doc(uid)
+    .collection('projects')
+    .doc(projectId)
+    .collection('chats')
+    .doc('AI')
+    .collection('chatlogs')
+
+  const chatDoc = {
+    role: 'user',
+    content: message.content || '',
+    timestamp: message.timestamp || Date.now()
+  }
+
+  await chatRef.add(chatDoc)
+
+  return { success: true, added: chatDoc }
+}
+
+export async function clearProjectChat(idToken, projectId) {
+  if (!idToken || !projectId) {
     throw new Error('Missing required data')
   }
 
@@ -47,16 +79,19 @@ export async function sendProjectChat(idToken, projectId, message) {
     .doc('AI')
     .collection('chatlogs')
 
-  const chatDoc = {
-    role: message.role || 'user',
-    content: message.content || '',
-    timestamp: message.timestamp || Date.now()
-  }
+  const snapshot = await chatRef.get()
+  
+  const batch = adminDb.batch()
 
-  await chatRef.add(chatDoc)
+  snapshot.forEach(doc => {
+    batch.delete(doc.ref)
+  })
 
-  return { success: true, added: chatDoc }
+  await batch.commit()
+
+  return { success: true, clearedCount: snapshot.size }
 }
+
 
 
 // export async function getProjectChatlogsSorted(idToken, projectId) {
