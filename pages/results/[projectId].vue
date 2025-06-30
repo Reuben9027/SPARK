@@ -45,7 +45,7 @@
                   color="primary"
                   variant="elevated"
                   size="large"
-                  @click="submitProject"
+                  @click="refineProject"
                   class="px-6"
                   prepend-icon="mdi-content-copy"
                 >
@@ -94,7 +94,7 @@
                   color="secondary"
                   variant="outlined"
                   size="large"
-                  @click="submitDescription"
+                  @click="refineProject"
                   class="px-6"
                   prepend-icon="mdi-pencil"
                 >
@@ -104,7 +104,7 @@
                   color="primary"
                   variant="elevated"
                   size="large"
-                  @click="router.replace('/dashboard')"
+                  @click="submitProject"
                   class="px-6"
                   prepend-icon="mdi-check"
                 >
@@ -119,21 +119,84 @@
   </v-sheet>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 
+const route = useRoute()
 const projectName = ref("");
 const projectDescription = ref("");
 const router = useRouter();
+const projectId = route.params.projectId
 
-const submitProject = () => {
+const submitProject = async () => {
   console.log("Project Name:", projectName.value);
+
+  const user = await getCurrentUser();
+
+  if(!user){
+    return;
+  }
+
+  const idToken = await user.getIdToken();
+  const metadata = {
+    title: projectName.value,
+    description: projectDescription.value
+
+  }
+
+  const res = await fetch('/api/users/update-project-metadata', {
+      method: 'POST',
+      headers: {
+      'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ idToken, projectId, metadata }),
+  })
+
+  const data = await res.json();
+  console.log(data);
+
+  navigateTo('/dashboard');
+  //then route
 };
 
-const submitDescription = () => {
-  console.log("Project Description:", projectDescription.value);
-};
+const refineProject = async () =>{
+  const user = await getCurrentUser();
+
+  console.log(user);
+  if(!user){
+    return;
+  }
+
+  const idToken = await user.getIdToken();
+  const messages = {
+    title: projectName.value,
+    description: projectDescription.value
+
+  }
+
+  const res = await fetch('/api/ai/refine', {
+      method: 'POST',
+      headers: {
+      'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ idToken, projectId, messages }),
+  })
+
+  try{
+    const data = await res.json();
+    const reply = data.reply;
+    console.log(data);
+    projectName.value = reply.title? reply.title :  projectName.value
+    projectDescription.value = reply.description?reply.description:projectDescription.value
+  }catch(error){
+
+  }
+  
+  
+
+}
+  
 </script>
 
 <style scoped>
