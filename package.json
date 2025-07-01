@@ -23,8 +23,5 @@
     "sass": "^1.89.2",
     "sass-loader": "^16.0.5",
     "vuetify": "^3.8.11"
-  },
-  "engines": {
-    "node": "18.x"
   }
 }

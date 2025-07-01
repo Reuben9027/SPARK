@@ -1,10 +1,12 @@
-import { adminAuth, adminDb } from '@/server/utils/firebase.admin'
+import { getFirebaseAdmin} from '@/server/utils/firebase.admin'
 import {sortByTimestamp } from '@/server/utils/sortings/sortings'
 
 export async function getProjectChatlogs(idToken, projectId) {
   if (!idToken || !projectId) {
     throw new Error('Missing ID token')
   }
+  const {adminAuth , adminDb} = getFirebaseAdmin();
+
   const decoded = await adminAuth.verifyIdToken(idToken)
   const uid = decoded.uid
 
@@ -34,6 +36,8 @@ export async function sendProjectChat(idToken, projectId, message) {
   if (!idToken || !message) {
     throw new Error('Missing required data')
   }
+
+  const {adminAuth , adminDb} = getFirebaseAdmin();
 
   // if(!projectId ){
   //   projectId = '_chatbot'
@@ -67,6 +71,7 @@ export async function clearProjectChat(idToken, projectId) {
     throw new Error('Missing required data')
   }
 
+  const {adminAuth , adminDb} = getFirebaseAdmin();
   const decoded = await adminAuth.verifyIdToken(idToken)
   const uid = decoded.uid
 

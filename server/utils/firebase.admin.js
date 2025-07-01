@@ -1,17 +1,25 @@
 import admin from 'firebase-admin'
 
-const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_CREDENTIALS || '{}')
+let app
+let adminAuth
+let adminDb
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    // databaseURL: "https://your-project-id.firebaseio.com"
-  })
+export function getFirebaseAdmin() {
+  if (!app) {
+    const config = useRuntimeConfig()
+    const serviceAccount = JSON.parse(config.FIREBASE_ADMIN_CREDENTIALS || '{}')
+
+    if (!admin.apps.length) {
+      app = admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+      })
+    } else {
+      app = admin.app()
+    }
+
+    adminAuth = admin.auth()
+    adminDb = admin.firestore()
+  }
+
+  return { adminAuth, adminDb }
 }
-
-const adminDb = admin.firestore()
-const adminAuth = admin.auth()
-
-// const provider = new GoogleAuthProvider()
-
-export { adminDb, adminAuth }
