@@ -7,7 +7,8 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "heroku-postbuild": "nuxt build"
   },
   "dependencies": {
     "firebase": "^11.10.0",
@@ -22,5 +23,8 @@
     "sass": "^1.89.2",
     "sass-loader": "^16.0.5",
     "vuetify": "^3.8.11"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }
