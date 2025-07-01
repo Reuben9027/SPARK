@@ -131,8 +131,9 @@ const projectId = route.params.projectId
 
 const submitProject = async () => {
   console.log("Project Name:", projectName.value);
+  const {user} = useCurrentUser();
 
-  const user = await getCurrentUser();
+  // const user = await getCurrentUser();
 
   if(!user){
     return;
@@ -161,7 +162,8 @@ const submitProject = async () => {
 };
 
 const refineProject = async () =>{
-  const user = await getCurrentUser();
+  const {user} = useCurrentUser();
+  // const user = await getCurrentUser();
 
   console.log(user);
   if(!user){
