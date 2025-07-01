@@ -33,6 +33,7 @@ export default defineNuxtConfig({
       enabled: true,
       sessionCookie: false, // Corrected property name
     },
+    
     // rtdb: true,
     // firestore: true,
     // storage: true,

@@ -71,8 +71,7 @@ const router = useRouter();
 const goToProject = async () => {
   console.log(aboutme.value);
   try{
-    const {user} = useCurrentUser();
-    // const user = await getCurrentUser();
+    const user = await getCurrentUser();
     const idToken = await user.getIdToken();
     
 

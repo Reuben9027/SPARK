@@ -1331,8 +1331,7 @@ const showChatMenu = ref(false);
 
 
 async function chatNewSession(){
-  const {user} = useCurrentUser();
-  // const user= await getCurrentUser();
+  const user= await getCurrentUser();
   const idToken = await user.getIdToken();
 
   const response = await fetch('/api/ai/new-chat-session', {
@@ -1423,8 +1422,8 @@ async function sendMessage() {
 
 async function generateAIResponse(userInput: string) {
   const input = userInput.toLowerCase();
-  const {user} = useCurrentUser();
-  // const user= await getCurrentUser();
+
+  const user= await getCurrentUser();
   const idToken = await user.getIdToken();
 
   const message = {
