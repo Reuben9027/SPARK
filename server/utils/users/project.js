@@ -1,10 +1,12 @@
-import { adminAuth, adminDb } from '@/server/utils/firebase.admin'
+import { getFirebaseAdmin } from '@/server/utils/firebase.admin'
 // import project from '~/server/api/users/project'
 
 export async function getUsersAllProject(idToken) {
   if (!idToken) {
     throw new Error('Missing ID token')
   }
+
+  const {adminAuth , adminDb} = getFirebaseAdmin();
 
   const decoded = await adminAuth.verifyIdToken(idToken)
   const uid = decoded.uid
@@ -31,6 +33,7 @@ export async function getUserProject(idToken, projectId) {
     if (!idToken || !projectId) {
         throw new Error('Missing parameters')
     }
+    const {adminAuth , adminDb} = getFirebaseAdmin();
 
     const decoded = await adminAuth.verifyIdToken(idToken)
     const uid = decoded.uid
@@ -59,6 +62,7 @@ export async function initUserProject(idToken, metadata = {}) {
   if (!idToken) {
     throw new Error('Missing parameters')
   }
+  const {adminAuth , adminDb} = getFirebaseAdmin();
 
   const decoded = await adminAuth.verifyIdToken(idToken)
   const uid = decoded.uid
@@ -113,6 +117,7 @@ export async function setFirstPrompt(idToken, projectId, prompt) {
   if (!idToken || !projectId) {
     throw new Error('Missing parameters')
   }
+  const {adminAuth , adminDb} = getFirebaseAdmin();
 
   const decoded = await adminAuth.verifyIdToken(idToken)
   const uid = decoded.uid
@@ -155,6 +160,7 @@ export async function updateProjectMetadata( idToken , projectId, metadata){
     if (!idToken || !projectId || !metadata) {
       throw new Error('Missing parameters')
     }
+    const {adminAuth , adminDb} = getFirebaseAdmin();
 
     const decoded = await adminAuth.verifyIdToken(idToken)
     const uid = decoded.uid
@@ -196,6 +202,7 @@ export async function getFirstPrompt(idToken, projectId) {
   if (!idToken || !projectId) {
     throw new Error('Missing parameters')
   }
+  const {adminAuth , adminDb} = getFirebaseAdmin();
 
   const decoded = await adminAuth.verifyIdToken(idToken)
   const uid = decoded.uid

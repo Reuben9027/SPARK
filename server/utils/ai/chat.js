@@ -1,5 +1,6 @@
 // utils/aiChat.js
 import { readBody } from 'h3'
+import { getFirebaseAdmin} from '@/server/utils/firebase.admin'
 
 const model = process.env.AI_MODEL
 
@@ -13,6 +14,7 @@ export async function callAI(idToken,messages) {
   if (!messages|| !idToken) {
     return { error: 'Message is required' }
   }
+  const {adminAuth } = getFirebaseAdmin();
 
   const decoded = await adminAuth.verifyIdToken(idToken)
   const uid = decoded.uid
@@ -60,6 +62,8 @@ export async function listener(idToken, message){
   if (!message|| !idToken) {
     return { error: 'Message is required' }
   }
+
+  const {adminAuth } = getFirebaseAdmin();
 
   const decoded = await adminAuth.verifyIdToken(idToken)
   const uid = decoded.uid
@@ -118,6 +122,8 @@ export async function refineIdea(idToken,messages) {
   if (!messages|| !idToken) {
     return { error: 'Message is required' }
   }
+
+  const {adminAuth } = getFirebaseAdmin();
 
   const decoded = await adminAuth.verifyIdToken(idToken)
   const uid = decoded.uid
