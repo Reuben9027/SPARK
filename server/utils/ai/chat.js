@@ -1,14 +1,11 @@
 // utils/aiChat.js
 import { readBody } from 'h3'
 
-const model = "gpt-3.5-turbo"
-// const model = "deepseek-r1:8b"
+const model = process.env.AI_MODEL
 
-const api_link = 'https://api.openai.com/v1/chat/completions'
-// const api_link = 'https://on-colt-17.rshare.io/api/chat/completions'  
+const api_link = process.env.AI_API_LINK
 
-const apiKey =process.env.OPENAI_API_KEY;
-// const apiKey =process.env.LOCAL_AI_KEY;
+const apiKey =process.env.AI_KEY;
 
 export async function callAI(idToken,messages) {
   // const userMessage = body.message
