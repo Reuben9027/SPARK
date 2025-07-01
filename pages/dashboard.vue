@@ -1080,7 +1080,7 @@ function toggleTodo(id: number) {
       if (newLevel > userLevel.value) {
         userLevel.value = newLevel;
         // Show level up notification
-        levelUpNotificationText.value = `ğŸ‰ Level Up! You are now level ${userLevel.value}!`;
+        levelUpNotificationText.value = `?‰ Level Up! You are now level ${userLevel.value}!`;
         showLevelUpNotification.value = true;
       }
 
@@ -1329,10 +1329,34 @@ const chatMessagesRef = ref<HTMLElement | null>(null);
 const isTyping = ref(false);
 const showChatMenu = ref(false);
 
-function toggleChat() {
+
+async function chatNewSession(){
+  const user= await getCurrentUser();
+  const idToken = await user.getIdToken();
+
+  const response = await fetch('/api/ai/new-chat-session', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      idToken,
+      projectId: '_chatbot',
+    }),
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    console.error('Session generation error:', error)
+    return null
+  }
+}
+async function toggleChat() {
   showChat.value = !showChat.value;
   if (showChat.value) {
     // Auto-scroll to bottom when chat opens
+    //make session
+    
     setTimeout(() => {
       scrollToBottom();
     }, 100);
@@ -1354,7 +1378,7 @@ function scrollToBottom() {
   }
 }
 
-function sendMessage() {
+async function sendMessage() {
   if (newMessage.value.trim() && !isTyping.value) {
     // Add user message
     const userMessage = {
@@ -1377,9 +1401,9 @@ function sendMessage() {
     isTyping.value = true;
 
     // Simulate AI response with typing delay
-    setTimeout(() => {
+    setTimeout(async () => {
       isTyping.value = false;
-      const aiResponse = generateAIResponse(userInput);
+      const aiResponse = await generateAIResponse(userInput);
       const aiMessage = {
         id: Date.now() + 1,
         text: aiResponse,
@@ -1392,24 +1416,57 @@ function sendMessage() {
       setTimeout(() => {
         scrollToBottom();
       }, 100);
-    }, 1500 + Math.random() * 1000); // Random delay between 1.5-2.5 seconds
+    }, 1 + Math.random() *1); // Random delay between 1.5-2.5 seconds
   }
 }
 
-function generateAIResponse(userInput: string) {
+async function generateAIResponse(userInput: string) {
   const input = userInput.toLowerCase();
+
+  const user= await getCurrentUser();
+  const idToken = await user.getIdToken();
+
+  const message = {
+    content: input
+  }
+
+  const response = await fetch('/api/ai/chat', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      idToken,
+      projectId: '_chatbot',
+      message,
+    }),
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    console.error('AI fetch error:', error)
+    return null
+  }
+
+  const result = await response.json()
+
+  if (result?.reply) {
+    return result.reply.content
+  }
+
+
 
   // Enhanced responses with more personality and helpful suggestions
   if (input.includes("help") || input.includes("assist")) {
-    return "I'm here to help! I can assist you with:\n\nâ€¢ ğŸ“Š Project management and progress tracking\nâ€¢ âœ… Task organization and prioritization\nâ€¢ ğŸ¯ Business validation and planning\nâ€¢ ğŸ¨ Design and feature analysis\nâ€¢ ğŸ“‹ Checklist creation and management\n\nWhat would you like to work on today?";
+    return "I'm here to help! I can assist you with:\n\nâ€¢ ?“Š Project management and progress tracking\nâ€¢ âœ? Task organization and prioritization\nâ€¢ ?¯ Business validation and planning\nâ€¢ ?¨ Design and feature analysis\nâ€¢ ?“‹ Checklist creation and management\n\nWhat would you like to work on today?";
   }
 
   if (input.includes("project") || input.includes("progress")) {
-    return "Great! I can help you with project management. Here are some things we can do:\n\nâ€¢ ğŸ“ˆ Review your current project progress\nâ€¢ ğŸ¯ Set new milestones and goals\nâ€¢ ğŸ“‹ Create task lists and priorities\nâ€¢ ğŸ” Analyze project bottlenecks\nâ€¢ ğŸ“Š Generate progress reports\n\nWhich project would you like to focus on?";
+    return "Great! I can help you with project management. Here are some things we can do:\n\nâ€¢ ?“ˆ Review your current project progress\nâ€¢ ?¯ Set new milestones and goals\nâ€¢ ?“‹ Create task lists and priorities\nâ€¢ ?” Analyze project bottlenecks\nâ€¢ ?“Š Generate progress reports\n\nWhich project would you like to focus on?";
   }
 
   if (input.includes("task") || input.includes("todo")) {
-    return "Task management is key to success! I can help you:\n\nâ€¢ â• Create new tasks with priorities\nâ€¢ ğŸ“ Organize tasks by project or category\nâ€¢ â° Set deadlines and reminders\nâ€¢ ğŸ“Š Track completion rates\nâ€¢ ğŸ¯ Prioritize your workload\n\nWould you like to add a new task or review your current list?";
+    return "Task management is key to success! I can help you:\n\nâ€¢ â? Create new tasks with priorities\nâ€¢ ?“ Organize tasks by project or category\nâ€¢ â° Set deadlines and reminders\nâ€¢ ?“Š Track completion rates\nâ€¢ ?¯ Prioritize your workload\n\nWould you like to add a new task or review your current list?";
   }
 
   if (
@@ -1417,7 +1474,7 @@ function generateAIResponse(userInput: string) {
     input.includes("business") ||
     input.includes("design")
   ) {
-    return "Excellent! Let's work on your project strategy. I can help with:\n\nâ€¢ ğŸ¨ Design system and UI/UX planning\nâ€¢ ğŸ’¼ Business model validation\nâ€¢ ğŸš€ Feature prioritization and roadmap\nâ€¢ ğŸ“Š Market analysis and competitor research\nâ€¢ ğŸ¯ User experience optimization\n\nWhich aspect would you like to explore first?";
+    return "Excellent! Let's work on your project strategy. I can help with:\n\nâ€¢ ?¨ Design system and UI/UX planning\nâ€¢ ?’¼ Business model validation\nâ€¢ ?š€ Feature prioritization and roadmap\nâ€¢ ?“Š Market analysis and competitor research\nâ€¢ ?¯ User experience optimization\n\nWhich aspect would you like to explore first?";
   }
 
   if (
@@ -1425,11 +1482,11 @@ function generateAIResponse(userInput: string) {
     input.includes("hi") ||
     input.includes("hey")
   ) {
-    return "Hello there! ğŸ‘‹ I'm your AI project assistant, ready to help you succeed! I can see you're working on some exciting projects. How can I help you today?\n\nğŸ’¡ Tip: Try asking me about project progress, task management, or business planning!";
+    return "Hello there! ?‘‹ I'm your AI project assistant, ready to help you succeed! I can see you're working on some exciting projects. How can I help you today?\n\n?’¡ Tip: Try asking me about project progress, task management, or business planning!";
   }
 
   if (input.includes("checklist") || input.includes("check")) {
-    return "Checklists are powerful productivity tools! I can help you:\n\nâ€¢ ğŸ“‹ Create comprehensive project checklists\nâ€¢ âœ… Track completion status\nâ€¢ ğŸ”„ Set up recurring task lists\nâ€¢ ğŸ“Š Monitor checklist progress\nâ€¢ ğŸ¯ Prioritize checklist items\n\nWould you like to create a new checklist or review existing ones?";
+    return "Checklists are powerful productivity tools! I can help you:\n\nâ€¢ ?“‹ Create comprehensive project checklists\nâ€¢ âœ? Track completion status\nâ€¢ ?”„ Set up recurring task lists\nâ€¢ ?“Š Monitor checklist progress\nâ€¢ ?¯ Prioritize checklist items\n\nWould you like to create a new checklist or review existing ones?";
   }
 
   if (
@@ -1437,7 +1494,7 @@ function generateAIResponse(userInput: string) {
     input.includes("market") ||
     input.includes("competitor")
   ) {
-    return "Business strategy is crucial! Let's analyze:\n\nâ€¢ ğŸ“Š Market size and growth potential\nâ€¢ ğŸ¢ Competitive landscape analysis\nâ€¢ ğŸ’° Revenue model validation\nâ€¢ ğŸ¯ Target audience identification\nâ€¢ ğŸ“ˆ Business metrics and KPIs\n\nWhat specific business aspect would you like to explore?";
+    return "Business strategy is crucial! Let's analyze:\n\nâ€¢ ?“Š Market size and growth potential\nâ€¢ ?¢ Competitive landscape analysis\nâ€¢ ?’° Revenue model validation\nâ€¢ ?¯ Target audience identification\nâ€¢ ?“ˆ Business metrics and KPIs\n\nWhat specific business aspect would you like to explore?";
   }
 
   if (
@@ -1445,7 +1502,7 @@ function generateAIResponse(userInput: string) {
     input.includes("ui") ||
     input.includes("ux")
   ) {
-    return "Design is where creativity meets functionality! I can help with:\n\nâ€¢ ğŸ¨ UI/UX design principles and best practices\nâ€¢ ğŸ¯ User journey mapping\nâ€¢ ğŸ“± Responsive design strategies\nâ€¢ ğŸ¨ Color schemes and typography\nâ€¢ ğŸ” Usability testing and optimization\n\nWhat design challenge are you facing?";
+    return "Design is where creativity meets functionality! I can help with:\n\nâ€¢ ?¨ UI/UX design principles and best practices\nâ€¢ ?¯ User journey mapping\nâ€¢ ?“± Responsive design strategies\nâ€¢ ?¨ Color schemes and typography\nâ€¢ ?” Usability testing and optimization\n\nWhat design challenge are you facing?";
   }
 
   if (
@@ -1453,14 +1510,15 @@ function generateAIResponse(userInput: string) {
     input.includes("stack") ||
     input.includes("technology")
   ) {
-    return "Technology choices can make or break a project! Let's discuss:\n\nâ€¢ ğŸ’» Frontend and backend technologies\nâ€¢ ğŸ—„ï¸ Database and infrastructure options\nâ€¢ ğŸ”§ Development tools and frameworks\nâ€¢ ğŸ“± Mobile and web platform decisions\nâ€¢ ğŸ”’ Security and scalability considerations\n\nWhat's your current tech stack or what are you considering?";
+    return "Technology choices can make or break a project! Let's discuss:\n\nâ€¢ ?’» Frontend and backend technologies\nâ€¢ ?—„?¸? Database and infrastructure options\nâ€¢ ?”§ Development tools and frameworks\nâ€¢ ?“± Mobile and web platform decisions\nâ€¢ ?”’ Security and scalability considerations\n\nWhat's your current tech stack or what are you considering?";
   }
 
   // Default response with suggestions
-  return `I understand you're asking about "${userInput}". Here are some ways I can help:\n\nâ€¢ ğŸš€ **Project Planning**: Set goals, milestones, and timelines\nâ€¢ ğŸ“‹ **Task Management**: Organize and prioritize your work\nâ€¢ ğŸ’¼ **Business Strategy**: Validate ideas and analyze markets\nâ€¢ ğŸ¨ **Design & UX**: Create user-friendly interfaces\nâ€¢ ğŸ”§ **Tech Decisions**: Choose the right technologies\n\nWhat would you like to focus on? I'm here to guide you through every step!`;
+  return `I understand you're asking about "${userInput}". Here are some ways I can help:\n\nâ€¢ ?š€ **Project Planning**: Set goals, milestones, and timelines\nâ€¢ ?“‹ **Task Management**: Organize and prioritize your work\nâ€¢ ?’¼ **Business Strategy**: Validate ideas and analyze markets\nâ€¢ ?¨ **Design & UX**: Create user-friendly interfaces\nâ€¢ ?”§ **Tech Decisions**: Choose the right technologies\n\nWhat would you like to focus on? I'm here to guide you through every step!`;
 }
 
-function clearChat() {
+async function clearChat() {
+  await chatNewSession();
   chatMessages.value = [];
 }
 

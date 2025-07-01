@@ -68,9 +68,43 @@ import { useRouter } from "vue-router";
 const aboutme = ref("");
 const router = useRouter();
 
-const goToProject = () => {
-  router.replace("/results");
+const goToProject = async () => {
+  console.log(aboutme.value);
+  try{
+    const user = await getCurrentUser();
+    const idToken = await user.getIdToken();
+    
+
+    const metadata = {
+      first_prompt : aboutme.value,
+    }
+
+    const res = await fetch('/api/users/init-project', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ idToken, metadata}),
+    })
+    const data = await res.json();
+    const projectId = data.project.id;
+    console.log(data.project.id);
+    router.replace(`/results/${projectId}`);
+  }catch(error){
+  }
+  // router.replace("/results");
 };
+
+
+
+
+
+
+
+
+
+
+
 </script>
 
 <style scoped>

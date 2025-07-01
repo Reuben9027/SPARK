@@ -10,7 +10,7 @@
       <div class="hero-content">
         <div class="hero-text">
           <div class="hero-badge">
-            <span class="badge-icon">ðŸš€</span>
+            <span class="badge-icon">?š€</span>
             <span class="badge-text">AI-Powered Project Management</span>
           </div>
 
@@ -32,7 +32,7 @@
               color="primary"
               variant="elevated"
               class="cta-button"
-              @click="router.push('/welcome')"
+              @click="handleGoogleLogin()"
               prepend-icon="mdi-rocket-launch"
             >
               Start Your Project
@@ -214,7 +214,7 @@
               <h3>From Idea to Revenue in 3 Weeks</h3>
               <p>
                 "The AI Project Manager gave me clarity and speed. I shipped my
-                MVP and landed paying users â€” solo."
+                MVP and landed paying users â€? solo."
               </p>
               <div class="project-tech">
                 <span>Founder</span>
@@ -288,6 +288,9 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import {signInWithPopup } from 'firebase/auth'
+
+const { $auth, $provider} = useNuxtApp();
 
 const router = useRouter();
 
@@ -322,6 +325,21 @@ const scrollToSection = (sectionId: string) => {
     element.scrollIntoView({ behavior: "smooth" });
   }
 };
+
+const error: Ref<string | null> = ref(null)
+
+const handleGoogleLogin = async (): Promise<void> => {
+  const auth = $auth
+  const provider = $provider
+  try {
+    await signInWithPopup(auth, provider)
+    navigateTo('/welcome')
+  } catch (err: unknown) {
+    error.value = 'Google sign-in failed.'
+    console.error(err)
+  }
+}
+
 </script>
 
 <style scoped>
