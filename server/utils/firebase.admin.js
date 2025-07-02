@@ -1,4 +1,8 @@
-import admin from 'firebase-admin'
+import { initializeApp, cert, getApp, getApps } from 'firebase-admin/app'
+import { getAuth } from 'firebase-admin/auth'
+import { getFirestore } from 'firebase-admin/firestore'
+// import admin from 'firebase-admin'
+
 
 let app
 let adminAuth
@@ -9,16 +13,19 @@ export function getFirebaseAdmin() {
     const config = useRuntimeConfig()
     const serviceAccount = JSON.parse(config.FIREBASE_ADMIN_CREDENTIALS || '{}')
 
-    if (!admin.apps.length) {
-      app = admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount)
+    console.log(getApps());
+
+    try {
+      app = getApp('admin');  
+    } catch (error) {
+      app = initializeApp({
+        credential: cert(serviceAccount),
+        name: 'admin'
       })
-    } else {
-      app = admin.app()
     }
 
-    adminAuth = admin.auth()
-    adminDb = admin.firestore()
+    adminAuth = getAuth()
+    adminDb = getFirestore()
   }
 
   return { adminAuth, adminDb }

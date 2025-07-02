@@ -28,14 +28,17 @@ export default defineNuxtConfig({
       messagingSenderId: process.env.NUXT_PUBLIC_MESSAGING_SENDER_ID,
       appId: process.env.NUXT_PUBLIC_APP_ID,
       measurementId: process.env.NUXT_PUBLIC_MEASUREMENT_ID,
-    },
+    }, 
     auth: {
       enabled: true,
       sessionCookie: false, // Corrected property name
     },
-    
     // rtdb: true,
     // firestore: true,
-    // storage: true,
+    // storage: true,e
+  },
+  runtimeConfig: {
+      // GOOGLE_APPLICATION_CREDENTIALS: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+      FIREBASE_ADMIN_CREDENTIALS:process.env.FIREBASE_ADMIN_CREDENTIALS
   }
 })
