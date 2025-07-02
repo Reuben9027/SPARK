@@ -20,7 +20,7 @@ export async function callAI(idToken,messages) {
   const uid = decoded.uid
 
   try {
-    console.log("called");
+    //console.log("called");
     const response = await fetch(api_link, {
       method: 'POST',
       headers: {
@@ -37,7 +37,6 @@ export async function callAI(idToken,messages) {
         temperature: 0.7,
       }),
     })
-    console.log("HELLOs");
 
     const data = await response.json()
 
@@ -68,7 +67,7 @@ export async function listener(idToken, message){
   const decoded = await adminAuth.verifyIdToken(idToken)
   const uid = decoded.uid
   try {
-    console.log("called");
+    //console.log("called");
     const response = await fetch(api_link, {
       method: 'POST',
       headers: {
@@ -96,7 +95,6 @@ export async function listener(idToken, message){
         temperature: 0.7,
       }),
     })
-    console.log("HELLOs");
 
     const data = await response.json()
 

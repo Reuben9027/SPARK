@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
     }
     const store_reply = await sendProjectChat(idToken, projectId, reply );
 
-    console.log(ai);
+    // console.log(ai);
 
     return { success: true, chat, reply }
   } catch (err) {

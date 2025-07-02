@@ -25,13 +25,13 @@ export default defineEventHandler(async (event) => {
         }
     ]
 
-    console.log(template)
+    //console.log(template)
     const chat = await refineIdea(idToken,template )
     
     const reply = JSON.parse(chat.reply);
 
-    console.log(reply);
-    console.log(chat.reply);
+    //console.log(reply);
+    //console.log(chat.reply);
 
     return { success: true, reply }
   } catch (err) {
