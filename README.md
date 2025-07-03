@@ -3,6 +3,7 @@
 > SPARKS is an AI-powered project management tool built for solo founders, developers, and freelancers — helping you validate ideas, break them into actionable features, and launch MVPs faster.
 
 **🌐 Live Demo:** [https://silly-fenglisu-85e278.netlify.app](https://silly-fenglisu-85e278.netlify.app)
+**🌐 With Server Demo:** [https://spark-qglq.onrender.com](https://spark-qglq.onrender.com)
 
 ---
 
