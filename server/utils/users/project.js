@@ -26,8 +26,6 @@ export async function getUsersAllProject(idToken) {
   return projects
 }
 
-
-
 export async function getUserProject(idToken, projectId) {
 
     if (!idToken || !projectId) {
@@ -76,16 +74,11 @@ export async function initUserProject(idToken, metadata = {}) {
   const projectSnap = await projectRef.get()
 
   if (!projectSnap.exists) {
-    // Create project document with optional metadata
     await projectRef.set({
-      title: metadata.title || 'Untitled Project',
-      description: metadata.description || '',
-      createdAt: Date.now()
+      ...metadata
     })
 
-    // Initialize empty doc in each subcollection
-    
-
+    //clean up 
     await projectRef.collection('chats').doc('AI').collection('chatlogs').doc('_init').set({
         role: 'system',
         content: 'you are a great assistant'
@@ -103,7 +96,6 @@ export async function initUserProject(idToken, metadata = {}) {
       })
     }
   }
-
   // Return the project (existing or newly created)
   const finalSnap = await projectRef.get()
   return {
@@ -234,4 +226,29 @@ export async function getFirstPrompt(idToken, projectId) {
   }
 
   return promptSnap.data() // { content: "..." }
+}
+
+
+export async function deleteUserProject(idToken, projectId) {
+  if (!idToken || !projectId) {
+    throw new Error('Missing parameters')
+  }
+
+  const { adminAuth, adminDb } = getFirebaseAdmin()
+  
+  const decoded = await adminAuth.verifyIdToken(idToken)
+  const uid = decoded.uid
+
+  const projectRef = adminDb
+    .collection('users')
+    .doc(uid)
+    .collection('projects')
+    .doc(projectId)
+
+  const projectSnap = await projectRef.get()
+
+  if (!projectSnap.exists) {
+    throw new Error('Project not found')
+  }
+  await projectRef.delete()
 }

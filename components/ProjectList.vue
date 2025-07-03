@@ -60,7 +60,7 @@
                         {{ project.status }}
                       </v-chip>
                       <span class="text-caption text-grey">
-                        {{ formatDate(project.createdAt) }}
+                        {{ formatDate(project.createdAt)}}
                       </span>
                     </div>
                   </div>
@@ -293,7 +293,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed } from "vue";
 
 // Dialog state
@@ -316,7 +316,7 @@ const newProject = ref({
 const statusOptions = ["Planning", "In Progress", "Testing", "Completed"];
 
 // Project data
-const projects = ref([
+const projectsArray = [
   {
     id: 1,
     title: "E-commerce Platform",
@@ -383,7 +383,8 @@ const projects = ref([
     deadline: "Dec 30, 2024",
     createdAt: new Date("2024-01-08"),
   },
-]);
+]
+const projects = ref([]);
 
 // Computed properties
 const totalProjects = computed(() => projects.value.length);
@@ -402,7 +403,7 @@ const avgProgress = computed(() => {
   return Math.round(total / projects.value.length);
 });
 
-function getStatusColor(status: string) {
+function getStatusColor(status) {
   switch (status) {
     case "Completed":
       return "success";
@@ -417,18 +418,23 @@ function getStatusColor(status: string) {
   }
 }
 
-function getProgressColor(progress: number) {
+function getProgressColor(progress) {
   if (progress >= 80) return "success";
   if (progress >= 50) return "warning";
   return "error";
 }
 
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(date);
+function formatDate(date) {
+  try{
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(date);
+  }catch(error){
+    return "error format"
+  }
+  
 }
 
 function addNewProject() {
@@ -454,15 +460,68 @@ function resetForm() {
   }
 }
 
-function confirmAddProject() {
+
+
+function editProject(id) {
+  console.log("Editing project:", id);
+}
+
+
+function viewProject(id) {
+  console.log("Viewing project:", id);
+}
+
+
+async function getAllProject(){
+  const user = await getCurrentUser();
+
+  if(!user){
+    return;
+  }
+
+  const idToken = await user.getIdToken();
+
+  const res = await fetch('/api/users/get-project-list', {
+      method: 'POST',
+      headers: {
+      'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({idToken}),
+  })
+
+  try{
+    const data = await res.json();
+    return data.data;
+    // const reply = data.data;
+    // console.log(data);
+  }catch(error){
+  }
+} 
+
+const refreshProjectList = async () => {
+  projects.value = []
+  const user_projects = await getAllProject();
+  console.log(user_projects);
+    user_projects.forEach((project, index) => {
+      console.log(project);
+      projects.value.unshift(project);
+    }
+  )
+}
+
+async function confirmAddProject() {
   if (!isFormValid.value) return;
 
-  isAdding.value = true;
+  const user = await getCurrentUser();
 
-  // Simulate API call delay
-  setTimeout(() => {
-    const project = {
-      id: Date.now(), // Generate unique ID
+  if(!user){
+    return;
+  }
+
+  const idToken = await user.getIdToken();
+
+  isAdding.value = true;
+  const project = {
       title: newProject.value.title,
       summary: newProject.value.summary,
       progress: newProject.value.progress,
@@ -470,27 +529,58 @@ function confirmAddProject() {
       teamSize: newProject.value.teamSize,
       deadline: newProject.value.deadline,
       createdAt: new Date(),
-    };
+  };
 
-    projects.value.unshift(project); // Add to beginning of list
+  const res = await fetch('/api/users/add-project', {
+      method: 'POST',
+      headers: {
+      'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({idToken, metadata: project}),
+  })
+  const data = await res.json();
 
+  if(data.success){
     isAdding.value = false;
     showAddDialog.value = false;
     resetForm();
-  }, 1000);
+    // projects.value.unshift(project);
+    await refreshProjectList();
+  }else{
+    alert("Failed");
+  }
 }
 
-function editProject(id: number) {
-  console.log("Editing project:", id);
+
+async function deleteProject(projectId) {
+  const user = await getCurrentUser();
+
+  if(!user){
+    return;
+  }
+  const idToken = await user.getIdToken();
+  
+  const res = await fetch('/api/users/delete-project', {
+      method: 'POST',
+      headers: {
+      'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({idToken,projectId}),
+  })
+  const data = await res.json();
+
+  if(data.success){
+    await refreshProjectList();
+  }else{
+    alert("Failed");
+
+  }
+  // projects.value = projects.value.filter((p) => p.id !== id);
 }
 
-function deleteProject(id: number) {
-  projects.value = projects.value.filter((p) => p.id !== id);
-}
+onMounted(async () => {await refreshProjectList()})
 
-function viewProject(id: number) {
-  console.log("Viewing project:", id);
-}
+
 </script>
 
 <style scoped>
